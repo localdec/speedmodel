@@ -22,8 +22,8 @@ email: mbrydon@localdec.com
 description: >-
   Initial data analysis for Fortis TIMC post-EMAT project.  
 
-baseurl: /SpeedModel
-url:     https://www.localdec.com             # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: /speedmodel
+url:     https://localdec.github.io             # the base hostname & protocol for your site, e.g. http://example.com
 
 
 #######################################################################################
