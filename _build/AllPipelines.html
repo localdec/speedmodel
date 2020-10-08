@@ -1,0 +1,782 @@
+---
+redirect_from:
+  - "/allpipelines"
+interact_link: content/AllPipelines.ipynb
+kernel_name: python3
+kernel_path: content
+has_widgets: false
+title: |-
+  Collection of frequency and peak velocity parameters from all pipelines
+pagenum: 2
+prev_page:
+  url: /GetVelocityParameters.html
+next_page:
+  url: 
+suffix: .ipynb
+search: parameters pipelines read tool pipeline collection frequency peak velocity operating create dictionary spreadsheet data loop through
+
+comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /content***"
+---
+
+    <main class="jupyter-page">
+    <div id="page-info"><div id="page-title">Collection of frequency and peak velocity parameters from all pipelines</div>
+</div>
+    <div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">localdec</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span> <span class="s2">&quot;../SpeedData&quot;</span>
+<span class="n">dist_col</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">pls</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span>  <span class="s2">&quot;Datasets.xlsx&quot;</span><span class="p">,</span>
+                   <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Datasets&quot;</span><span class="p">)</span>
+<span class="n">pls</span><span class="p">[</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pls</span><span class="p">[</span><span class="s2">&quot;Filename&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="s2">&quot;^(.*)\sVelocity.*&quot;</span><span class="p">)</span>
+<span class="n">pls</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pls</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>PiplineNo</th>
+      <th>Filename</th>
+      <th>Sheet</th>
+      <th>Header</th>
+      <th>Skip</th>
+      <th>SpeedData1</th>
+      <th>SpeedData2</th>
+      <th>SpeedData3</th>
+      <th>Tool1</th>
+      <th>Tool2</th>
+      <th>Tool3</th>
+      <th>PredictorTool</th>
+    </tr>
+    <tr>
+      <th>Pipeline</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>CH-NC_508</th>
+      <td>1</td>
+      <td>CH-NC_508 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2019 BHGE GEMINI MFL)</td>
+      <td>Velocity \n(2013 ROSEN AFD )</td>
+      <td>NaN</td>
+      <td>ROSEN AFD</td>
+    </tr>
+    <tr>
+      <th>LIV_PAT_457</th>
+      <td>2</td>
+      <td>LIV_PAT_457 Velocity Excursion Review.xlsm</td>
+      <td>Event Log &amp; Velocity Listing</td>
+      <td>4</td>
+      <td>5</td>
+      <td>6</td>
+      <td>7.0</td>
+      <td>8.0</td>
+      <td>Velocity (2019 BHGE MFL)</td>
+      <td>Velocity (2019 ROSEN MFL-C)</td>
+      <td>Velocity (2019 ROSEN EMAT (wSC))</td>
+      <td>ROSEN EMAT (wSC)</td>
+    </tr>
+    <tr>
+      <th>HUN_NIC_762</th>
+      <td>3</td>
+      <td>HUN_NIC_762 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2016 BH Gemini HD MFL (wSC))</td>
+      <td>Velocity \n(2017 ROSEN AFD )</td>
+      <td>NaN</td>
+      <td>ROSEN AFD</td>
+    </tr>
+    <tr>
+      <th>LIV_COQ_323</th>
+      <td>4</td>
+      <td>LIV_COQ_323 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>9.0</td>
+      <td>Velocity (2019 BHGE MagneScan MFL)</td>
+      <td>Velocity (2019 ROSEN MFL-A)</td>
+      <td>Velocity (2019 ROSEN MFL-C)</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+    <tr>
+      <th>NIC_FRA_610</th>
+      <td>5</td>
+      <td>NIC_FRA_610 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2013 BH MFL)</td>
+      <td>Velocity (2016 Rosen MFL-C )</td>
+      <td>NaN</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+    <tr>
+      <th>NIC_PMA_610</th>
+      <td>6</td>
+      <td>NIC_PMA_610 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity (2019 BHI Gemini HD MFL (wSC))</td>
+      <td>Velocity (2016 ROSEN MFL-C)</td>
+      <td>NaN</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+    <tr>
+      <th>ROE_TIL_914</th>
+      <td>7</td>
+      <td>ROE_TIL_914 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity (2013 BH MFL)</td>
+      <td>Velocity\n (2016 ROSEN MFL-C)</td>
+      <td>NaN</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+    <tr>
+      <th>TIL_BEN_323</th>
+      <td>8</td>
+      <td>TIL_BEN_323 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2013 BH MFL)</td>
+      <td>Velocity (2017 Rosen MFL-C )</td>
+      <td>NaN</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+    <tr>
+      <th>TIL_FRA_508</th>
+      <td>9</td>
+      <td>TIL_FRA_508 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2013 BH MFL)</td>
+      <td>Velocity (2016 Rosen MFL-C )</td>
+      <td>NaN</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+    <tr>
+      <th>TIL_LNG_323</th>
+      <td>10</td>
+      <td>TIL_LNG_323 Velocity Excursion Review.xlsm</td>
+      <td>Sheet2</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Velocity \n(2013 BH MFL)</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>BH MFL</td>
+    </tr>
+    <tr>
+      <th>HUN_NIC_1067</th>
+      <td>11</td>
+      <td>HUN_NIC_1067 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2018 BHGE MFL)</td>
+      <td>Velocity (2018 ROSEN MFL-C )</td>
+      <td>NaN</td>
+      <td>ROSEN MFL-C</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Read-tool-operating-parameters">Read tool operating parameters<a class="anchor-link" href="#Read-tool-operating-parameters"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tool_params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span>  <span class="s2">&quot;Datasets.xlsx&quot;</span><span class="p">,</span>
+                   <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Tools&quot;</span><span class="p">)</span>
+<span class="n">tool_params</span><span class="p">[</span><span class="s2">&quot;ToolName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_params</span><span class="p">[</span><span class="s2">&quot;ToolName&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+<span class="n">tool_params</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ToolName&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">tool_params</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Degrade</th>
+      <th>Blind</th>
+      <th>Peak</th>
+      <th>Comment</th>
+    </tr>
+    <tr>
+      <th>ToolName</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ROSEN EMAT (WSC)</th>
+      <td>2.5</td>
+      <td>4.0</td>
+      <td>4.00</td>
+      <td>Actual</td>
+    </tr>
+    <tr>
+      <th>ROSEN MFL-C</th>
+      <td>4.5</td>
+      <td>7.0</td>
+      <td>3.60</td>
+      <td>Good match</td>
+    </tr>
+    <tr>
+      <th>BHGE MFL</th>
+      <td>5.0</td>
+      <td>7.0</td>
+      <td>2.60</td>
+      <td>Okay match</td>
+    </tr>
+    <tr>
+      <th>BH MFL</th>
+      <td>5.0</td>
+      <td>7.0</td>
+      <td>2.60</td>
+      <td>Okay match</td>
+    </tr>
+    <tr>
+      <th>BHI GEMINI HD MFL (WSC)</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.45</td>
+      <td>Inverted match, weak</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Create-tool-dictionary-from-pipeline-spreadsheet">Create tool dictionary from pipeline spreadsheet<a class="anchor-link" href="#Create-tool-dictionary-from-pipeline-spreadsheet"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pipelines</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="n">colheads</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;(^SpeedData\d)&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">toolheads</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;(^Tool\d)&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">tools</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">toolhead</span> <span class="ow">in</span> <span class="n">toolheads</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">toolhead</span><span class="p">]</span> <span class="o">==</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">toolhead</span><span class="p">]:</span>
+            <span class="n">tcol</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;column&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">colheads</span><span class="p">[</span><span class="n">i</span><span class="p">]])}</span>
+            <span class="n">toolname</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Velocity\s*\(\d</span><span class="si">{4}</span><span class="s2">(.*)\)$&quot;</span><span class="p">,</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">toolhead</span><span class="p">])</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">tools</span><span class="p">[</span><span class="n">toolname</span><span class="p">]</span> <span class="o">=</span> <span class="n">tcol</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">pipeline</span><span class="p">[</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tools</span>
+    <span class="n">pipeline</span><span class="p">[</span><span class="s2">&quot;predictor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="s2">&quot;PredictorTool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">pipelines</span><span class="p">[</span><span class="n">pl</span><span class="p">]</span> <span class="o">=</span> <span class="n">pipeline</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Read-data-for-each-pipeline">Read data for each pipeline<a class="anchor-link" href="#Read-data-for-each-pipeline"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">pipeline</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">dist_col</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">tool</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Distance&quot;</span><span class="p">]</span> <span class="o">+</span>  <span class="p">[</span><span class="n">tool</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">data_skiprows</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Skip&quot;</span><span class="p">]):</span>
+        <span class="n">data_skiprows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Skip&quot;</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+    <span class="n">pl_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Filename&quot;</span><span class="p">],</span>
+                   <span class="n">sheet_name</span><span class="o">=</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Sheet&quot;</span><span class="p">],</span>
+                   <span class="n">usecols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+                   <span class="n">names</span> <span class="o">=</span> <span class="n">col_names</span><span class="p">,</span>
+                   <span class="n">skiprows</span><span class="o">=</span><span class="n">data_skiprows</span><span class="p">)</span>
+    <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl_raw</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>CH-NC_508
+LIV_PAT_457
+HUN_NIC_762
+LIV_COQ_323
+NIC_FRA_610
+NIC_PMA_610
+ROE_TIL_914
+TIL_BEN_323
+TIL_FRA_508
+TIL_LNG_323
+HUN_NIC_1067
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Loop-through-pipelines">Loop through pipelines<a class="anchor-link" href="#Loop-through-pipelines"> </a></h2>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dist_thresh</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="n">pl_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="s2">&quot;PredictorTool&quot;</span><span class="p">,</span> <span class="s2">&quot;Length&quot;</span><span class="p">,</span> <span class="s2">&quot;ExcursionCount&quot;</span><span class="p">,</span> <span class="s2">&quot;ExcursionLength&quot;</span><span class="p">])</span>
+
+<span class="c1">#for pipeline in pls[pls[&quot;PredictorTool&quot;] != &quot;ROSEN AFD&quot;].index:</span>
+<span class="k">for</span> <span class="n">pipeline</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">tool</span> <span class="o">=</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;PredictorTool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;Peak&quot;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> --&gt; predictor: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">tool</span><span class="p">))</span>
+    <span class="n">pl_raw</span> <span class="o">=</span>  <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+    <span class="n">pl_length</span> <span class="o">=</span> <span class="n">pl_raw</span><span class="p">[</span><span class="s2">&quot;Distance&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">pl_raw</span><span class="p">[</span><span class="s2">&quot;Distance&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    
+    <span class="c1"># unpivot data and create temporary dataframe</span>
+    <span class="n">pl</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">pl_raw</span><span class="p">,</span>
+                    <span class="n">id_vars</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span>
+                    <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span>
+                    <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;Velocity&quot;</span><span class="p">)</span>
+    <span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># reset</span>
+    <span class="n">localdec</span><span class="o">.</span><span class="n">mark_excursion</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="n">peak</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">pl</span><span class="p">)</span>
+    <span class="n">exc_count</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">tool</span><span class="p">)[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">exc_length</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">tool</span><span class="p">)[</span><span class="s2">&quot;Length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">exc_rate</span> <span class="o">=</span> <span class="n">exc_count</span><span class="o">/</span><span class="p">(</span><span class="n">pl_length</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># excursions per km&#39;&#39;&#39;</span>
+    <span class="n">pl_out</span> <span class="o">=</span> <span class="n">pl_out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">:</span> <span class="n">pipeline</span><span class="p">,</span>
+                   <span class="s2">&quot;PredictorTool&quot;</span><span class="p">:</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;PredictorTool&quot;</span><span class="p">],</span>
+                   <span class="s2">&quot;Length&quot;</span><span class="p">:</span> <span class="n">pl_length</span><span class="p">,</span>
+                   <span class="s2">&quot;ExcursionCount&quot;</span><span class="p">:</span> <span class="n">exc_count</span><span class="p">,</span>
+                   <span class="s2">&quot;ExcursionLength&quot;</span><span class="p">:</span> <span class="n">exc_length</span>
+                   <span class="p">},</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;distance: </span><span class="si">{:.1f}</span><span class="s2">km, number excursions: </span><span class="si">{}</span><span class="s2">, rate: </span><span class="si">{:.3f}</span><span class="s2"> excursions/km, avg length: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pl_length</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="n">exc_count</span><span class="p">,</span> <span class="n">exc_rate</span><span class="p">,</span> <span class="n">exc_length</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>CH-NC_508 --&gt; predictor: ROSEN AFD
+distance: 9.0km, number excursions: 2.0, rate: 0.221 excursions/km, avg length: 4482.0938914647
+LIV_PAT_457 --&gt; predictor: ROSEN EMAT (WSC)
+distance: 29.8km, number excursions: 8.0, rate: 0.269 excursions/km, avg length: 5.322625000000471
+HUN_NIC_762 --&gt; predictor: ROSEN AFD
+distance: 56.5km, number excursions: 58.0, rate: 1.027 excursions/km, avg length: 914.8400248793105
+LIV_COQ_323 --&gt; predictor: ROSEN MFL-C
+distance: 34.7km, number excursions: 52.0, rate: 1.500 excursions/km, avg length: 117.18121153846141
+NIC_FRA_610 --&gt; predictor: ROSEN MFL-C
+distance: 24.3km, number excursions: 39.0, rate: 1.602 excursions/km, avg length: 139.06492307692292
+NIC_PMA_610 --&gt; predictor: ROSEN MFL-C
+distance: 5.0km, number excursions: 10.0, rate: 2.015 excursions/km, avg length: 112.52282270000003
+ROE_TIL_914 --&gt; predictor: ROSEN MFL-C
+distance: 12.8km, number excursions: 10.0, rate: 0.783 excursions/km, avg length: 155.15199999999996
+TIL_BEN_323 --&gt; predictor: ROSEN MFL-C
+distance: 5.9km, number excursions: 5.0, rate: 0.848 excursions/km, avg length: 118.6036
+TIL_FRA_508 --&gt; predictor: ROSEN MFL-C
+distance: 9.7km, number excursions: 13.0, rate: 1.339 excursions/km, avg length: 118.90200000000011
+TIL_LNG_323 --&gt; predictor: BH MFL
+distance: 1.7km, number excursions: 9.0, rate: 5.187 excursions/km, avg length: 26.179444444444457
+HUN_NIC_1067 --&gt; predictor: ROSEN MFL-C
+distance: 55.7km, number excursions: 30.0, rate: 0.539 excursions/km, avg length: 36.6449243673035
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl_out</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pl_out</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>PredictorTool</th>
+      <th>Length</th>
+      <th>ExcursionCount</th>
+      <th>ExcursionLength</th>
+    </tr>
+    <tr>
+      <th>Pipeline</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>CH-NC_508</th>
+      <td>ROSEN AFD</td>
+      <td>9037.285407</td>
+      <td>2.0</td>
+      <td>4482.093891</td>
+    </tr>
+    <tr>
+      <th>LIV_PAT_457</th>
+      <td>ROSEN EMAT (wSC)</td>
+      <td>29777.100000</td>
+      <td>8.0</td>
+      <td>5.322625</td>
+    </tr>
+    <tr>
+      <th>HUN_NIC_762</th>
+      <td>ROSEN AFD</td>
+      <td>56451.747817</td>
+      <td>58.0</td>
+      <td>914.840025</td>
+    </tr>
+    <tr>
+      <th>LIV_COQ_323</th>
+      <td>ROSEN MFL-C</td>
+      <td>34670.809000</td>
+      <td>52.0</td>
+      <td>117.181212</td>
+    </tr>
+    <tr>
+      <th>NIC_FRA_610</th>
+      <td>ROSEN MFL-C</td>
+      <td>24344.515000</td>
+      <td>39.0</td>
+      <td>139.064923</td>
+    </tr>
+    <tr>
+      <th>NIC_PMA_610</th>
+      <td>ROSEN MFL-C</td>
+      <td>4963.774098</td>
+      <td>10.0</td>
+      <td>112.522823</td>
+    </tr>
+    <tr>
+      <th>ROE_TIL_914</th>
+      <td>ROSEN MFL-C</td>
+      <td>12763.874000</td>
+      <td>10.0</td>
+      <td>155.152000</td>
+    </tr>
+    <tr>
+      <th>TIL_BEN_323</th>
+      <td>ROSEN MFL-C</td>
+      <td>5892.920000</td>
+      <td>5.0</td>
+      <td>118.603600</td>
+    </tr>
+    <tr>
+      <th>TIL_FRA_508</th>
+      <td>ROSEN MFL-C</td>
+      <td>9706.206000</td>
+      <td>13.0</td>
+      <td>118.902000</td>
+    </tr>
+    <tr>
+      <th>TIL_LNG_323</th>
+      <td>BH MFL</td>
+      <td>1735.044000</td>
+      <td>9.0</td>
+      <td>26.179444</td>
+    </tr>
+    <tr>
+      <th>HUN_NIC_1067</th>
+      <td>ROSEN MFL-C</td>
+      <td>55709.279224</td>
+      <td>30.0</td>
+      <td>36.644924</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl_out</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">excel_writer</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span>  <span class="s2">&quot;SpeedModelOutput.xlsx&quot;</span><span class="p">,</span>
+                   <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;PipelineEstimates&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+ 
+
+
+    </main>
+    

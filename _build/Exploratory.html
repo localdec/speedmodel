@@ -1,0 +1,1911 @@
+---
+redirect_from:
+  - "/exploratory"
+interact_link: content/Exploratory.ipynb
+kernel_name: python3
+kernel_path: content
+has_widgets: false
+title: |-
+  Exploratory analysis of LIV_PAT_457
+pagenum: 0
+prev_page:
+  url: 
+next_page:
+  url: /GetVelocityParameters.html
+suffix: .ipynb
+search: tools tool velocity speed emat blindness threshold peak peaks below data rosen probability degrade thresholds dataframe velocities function value values between row analysis pipeline test correlation using new set following distance three used predict based curve its routine tuning livpat file dictionary called matrix above different away calculate blind given probabilty zero distribution start exceeds excursion location loop match purpose examine only parameters excel spreadsheet pandas bhgemfl show simple correlated comparing rows both pipelines conclusion provide shows section dataset against plots zoomed versions unpivot plot s normal define name not column non whether bhge never re point mark marks excursions
+
+comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /content***"
+---
+
+    <main class="jupyter-page">
+    <div id="page-info"><div id="page-title">Exploratory analysis of LIV_PAT_457</div>
+</div>
+    <div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The purpose of this notebook to to examine the behavior of ILI tools in the LIV_PAT_457 pipeline.  This pipeline is important because it is in only pipline for which Fortis has data from the Rosen EMAT.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Preliminaries">Preliminaries<a class="anchor-link" href="#Preliminaries"> </a></h1><h3 id="Libraries-and-file-locations">Libraries and file locations<a class="anchor-link" href="#Libraries-and-file-locations"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Set parameters for reading speed data from the Excel spreadsheet</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span> <span class="s2">&quot;../SpeedData&quot;</span>
+<span class="n">dist_col</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">pls</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span>  <span class="s2">&quot;Datasets.xlsx&quot;</span><span class="p">,</span>
+                   <span class="n">sheet_name</span> <span class="o">=</span> <span class="s2">&quot;Datasets&quot;</span><span class="p">)</span>
+<span class="n">pls</span><span class="p">[</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pls</span><span class="p">[</span><span class="s2">&quot;Filename&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="s2">&quot;^(.*)\sVelocity.*&quot;</span><span class="p">)</span>
+<span class="n">pls</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pls</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>PiplineNo</th>
+      <th>Filename</th>
+      <th>Sheet</th>
+      <th>Header</th>
+      <th>Skip</th>
+      <th>SpeedData1</th>
+      <th>SpeedData2</th>
+      <th>SpeedData3</th>
+      <th>Tool1</th>
+      <th>Tool2</th>
+      <th>Tool3</th>
+      <th>PredictorTool</th>
+    </tr>
+    <tr>
+      <th>Pipeline</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>CH-NC_508</th>
+      <td>1</td>
+      <td>CH-NC_508 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2019 BHGE GEMINI MFL)</td>
+      <td>Velocity \n(2013 ROSEN AFD )</td>
+      <td>NaN</td>
+      <td>ROSEN AFD</td>
+    </tr>
+    <tr>
+      <th>LIV_PAT_457</th>
+      <td>2</td>
+      <td>LIV_PAT_457 Velocity Excursion Review.xlsm</td>
+      <td>Event Log &amp; Velocity Listing</td>
+      <td>4</td>
+      <td>5</td>
+      <td>6</td>
+      <td>7.0</td>
+      <td>8.0</td>
+      <td>Velocity (2019 BHGE MFL)</td>
+      <td>Velocity (2019 ROSEN MFL-C)</td>
+      <td>Velocity (2019 ROSEN EMAT (wSC))</td>
+      <td>ROSEN EMAT (wSC)</td>
+    </tr>
+    <tr>
+      <th>HUN_NIC_762</th>
+      <td>3</td>
+      <td>HUN_NIC_762 Velocity Excursion Review.xlsm</td>
+      <td>Sheet1</td>
+      <td>4</td>
+      <td>5</td>
+      <td>7</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>Velocity \n(2016 BH Gemini HD MFL (wSC))</td>
+      <td>Velocity \n(2017 ROSEN AFD )</td>
+      <td>NaN</td>
+      <td>ROSEN AFD</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Create tool dictionary from pipeline spreadsheet</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pipelines</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="n">colheads</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;(^SpeedData\d)&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">toolheads</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;(^Tool\d)&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">pls</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">tools</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">toolhead</span> <span class="ow">in</span> <span class="n">toolheads</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">toolhead</span><span class="p">]</span> <span class="o">==</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">toolhead</span><span class="p">]:</span>
+            <span class="n">tcol</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;column&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">colheads</span><span class="p">[</span><span class="n">i</span><span class="p">]])}</span>
+            <span class="n">toolname</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Velocity\s*\(\d</span><span class="si">{4}</span><span class="s2">(.*)\)$&quot;</span><span class="p">,</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">,</span> <span class="n">toolhead</span><span class="p">])</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">tools</span><span class="p">[</span><span class="n">toolname</span><span class="p">]</span> <span class="o">=</span> <span class="n">tcol</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">pipeline</span><span class="p">[</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tools</span>
+    <span class="n">pipelines</span><span class="p">[</span><span class="n">pl</span><span class="p">]</span> <span class="o">=</span> <span class="n">pipeline</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tool_params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span>  <span class="s2">&quot;Datasets.xlsx&quot;</span><span class="p">,</span>
+                   <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Tools&quot;</span><span class="p">)</span>
+<span class="n">tool_params</span><span class="p">[</span><span class="s2">&quot;ToolName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_params</span><span class="p">[</span><span class="s2">&quot;ToolName&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+<span class="n">tool_params</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ToolName&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">tool_params</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Degrade</th>
+      <th>Blind</th>
+      <th>Peak</th>
+      <th>Comment</th>
+    </tr>
+    <tr>
+      <th>ToolName</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ROSEN EMAT (WSC)</th>
+      <td>2.5</td>
+      <td>4.0</td>
+      <td>4.00</td>
+      <td>Actual</td>
+    </tr>
+    <tr>
+      <th>ROSEN MFL-C</th>
+      <td>4.5</td>
+      <td>7.0</td>
+      <td>3.60</td>
+      <td>Good match</td>
+    </tr>
+    <tr>
+      <th>BHGE MFL</th>
+      <td>5.0</td>
+      <td>7.0</td>
+      <td>2.60</td>
+      <td>Okay match</td>
+    </tr>
+    <tr>
+      <th>BH MFL</th>
+      <td>5.0</td>
+      <td>7.0</td>
+      <td>2.60</td>
+      <td>Okay match</td>
+    </tr>
+    <tr>
+      <th>BHI GEMINI HD MFL (WSC)</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.45</td>
+      <td>Inverted match, weak</td>
+    </tr>
+    <tr>
+      <th>BH GEMINI HD MFL (WSC)</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>3.45</td>
+      <td>Inverted match, weak</td>
+    </tr>
+    <tr>
+      <th>ROSEN AFD</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.70</td>
+      <td>Match unknown</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Read-the-file">Read the file<a class="anchor-link" href="#Read-the-file"> </a></h3><p>The following reads the Excel file into a Pandas dataframe call <code>pl_raw</code>.  The dataframe consists of an integer index, a Distance value, and then tool velocity values for each of the three tools.</p>
+<p>Duplicates are removed (wherever the distance and velocity of the BHGE_MFL are identical). The <code>head()</code> method is called to show the first four values of the resulting dataframe.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;LIV_PAT_457&quot;</span><span class="p">]</span>  <span class="c1"># only read for two pipeline(s) of interest</span>
+<span class="k">for</span> <span class="n">pipeline</span> <span class="ow">in</span> <span class="n">pl_list</span><span class="p">:</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">dist_col</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">tool</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Distance&quot;</span><span class="p">]</span> <span class="o">+</span>  <span class="p">[</span><span class="n">tool</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">data_skiprows</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Skip&quot;</span><span class="p">]):</span>
+        <span class="n">data_skiprows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Skip&quot;</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+    <span class="n">pl_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Filename&quot;</span><span class="p">],</span>
+                   <span class="n">sheet_name</span><span class="o">=</span><span class="n">pls</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pipeline</span><span class="p">,</span> <span class="s2">&quot;Sheet&quot;</span><span class="p">],</span>
+                   <span class="n">usecols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+                   <span class="n">names</span> <span class="o">=</span> <span class="n">col_names</span><span class="p">,</span>
+                   <span class="n">skiprows</span><span class="o">=</span><span class="n">data_skiprows</span><span class="p">)</span>
+    <span class="n">pl_raw</span> <span class="o">=</span> <span class="n">pl_raw</span><span class="p">[</span><span class="n">pl_raw</span><span class="o">.</span><span class="n">duplicated</span><span class="p">([</span><span class="s2">&quot;Distance&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="kc">True</span><span class="p">]</span>
+    <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl_raw</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>LIV_PAT_457
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+pl_raw = pipelines["LIV_PAT_457"]["data"]
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Test-1:-Velocity-correlation-between-tools">Test 1: Velocity correlation between tools<a class="anchor-link" href="#Test-1:-Velocity-correlation-between-tools"> </a></h1><p>The following is a simple visual analysis to determine if the velocities for the three tools are correlated with each other. The code below constructs a pairplot by comparing each pairwise combination of velocities in every row of the dataframe.  Rows in which one or both velocity values are missing are supressed.</p>
+<p>If the velocities of the tools are highly correlated, then the velocity of other tools can be used to predict the velocity of the Rosen EMAT.  This would be a useful way to use historical data from other tools in other pipelines to predict the speed of the Rosen EMAT in those same pipelines.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">pl_raw</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>&lt;Figure size 720x720 with 0 Axes&gt;</pre>
+</div>
+
+</div>
+</div>
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_12_1.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Conclusion:</strong> If we focus on the bottom row of the scatterplot matrix, we see that neither the BHGE_MFL nor the ROSEN_MFL_C velocities provide a good prediction of the velocity of the ROSEN_EMAT.  Furthermore, if we examine the histograms along the diagonals, we see a much smaller variance in the velocity of the EMAT.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The correlation matrix (which shows correlation coefficients for each pair of tools) provides numbers for the scatterplots above.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl_raw</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>BHGE MFL</th>
+      <th>ROSEN MFL-C</th>
+      <th>ROSEN EMAT (WSC)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>BHGE MFL</th>
+      <td>1.00</td>
+      <td>0.71</td>
+      <td>0.61</td>
+    </tr>
+    <tr>
+      <th>ROSEN MFL-C</th>
+      <td>0.71</td>
+      <td>1.00</td>
+      <td>0.55</td>
+    </tr>
+    <tr>
+      <th>ROSEN EMAT (WSC)</th>
+      <td>0.61</td>
+      <td>0.55</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Test-2:-Examination-of-speed-profiles">Test 2: Examination of speed profiles<a class="anchor-link" href="#Test-2:-Examination-of-speed-profiles"> </a></h1><p>In this section, the velocity of each tool in the LIV_PAT_457 dataset is plotted against distance.  The purpose of these plots (included the zoomed versions) is to better understand the differences in the velocities of the different tools.</p>
+<p>To make this easier using the Seaborn graphics library, we first "unpivot" the data so that it is in long format.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Unpivot-pipeline-data">Unpivot pipeline data<a class="anchor-link" href="#Unpivot-pipeline-data"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">pl_raw</span><span class="p">,</span>
+                <span class="n">id_vars</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span>
+                <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span>
+                <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;Velocity&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Distance</th>
+      <th>Tool</th>
+      <th>Velocity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.000</td>
+      <td>BHGE MFL</td>
+      <td>1.171</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.137</td>
+      <td>BHGE MFL</td>
+      <td>0.954</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.583</td>
+      <td>BHGE MFL</td>
+      <td>1.048</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Plot-speed-profile">Plot speed profile<a class="anchor-link" href="#Plot-speed-profile"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Velocity&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pl</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;tool speed&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_20_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ROSEN EMAT (WSC)&quot;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Velocity&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">2.5</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Distance</th>
+      <th>Tool</th>
+      <th>Velocity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>5544</th>
+      <td>21.647</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>5547</th>
+      <td>48.112</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>2.9</td>
+    </tr>
+    <tr>
+      <th>5625</th>
+      <td>885.202</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>3.2</td>
+    </tr>
+    <tr>
+      <th>5626</th>
+      <td>899.720</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>4.0</td>
+    </tr>
+    <tr>
+      <th>5627</th>
+      <td>913.008</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>3.2</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>8047</th>
+      <td>27964.020</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>5.1</td>
+    </tr>
+    <tr>
+      <th>8048</th>
+      <td>27974.296</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>3.5</td>
+    </tr>
+    <tr>
+      <th>8100</th>
+      <td>28456.045</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>2.7</td>
+    </tr>
+    <tr>
+      <th>8102</th>
+      <td>28456.672</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>2.8</td>
+    </tr>
+    <tr>
+      <th>8123</th>
+      <td>28518.987</td>
+      <td>ROSEN EMAT (WSC)</td>
+      <td>3.7</td>
+    </tr>
+  </tbody>
+</table>
+<p>86 rows × 3 columns</p>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Test-3:-Probability-of-blindness">Test 3: Probability of blindness<a class="anchor-link" href="#Test-3:-Probability-of-blindness"> </a></h1><p>In this test, we move away from velocity as the measure of interest and calculate the probability that the tool is blind given the specific tool characteristics and velocity.</p>
+<p>To map from tool speed to probability of blindness, we use a transformation based on an S-curve.  Specifically, the probabilty of the tool blindness below the "degrade" threshold velocity defined for each tool is zero.  On the other hand, the probabilty of blindness above the "blind" threshold velocity is 1.0.  An intermediate probability between zero and 1.0 is assigned to velocities between the thresholds.</p>
+<h3 id="Determining-the-threshold-curve">Determining the threshold curve<a class="anchor-link" href="#Determining-the-threshold-curve"> </a></h3><p>The threshold curve is illustrated below for the Rosen EMAT thresholds.  The cumulative normal distribution function (CDF) is used to provide the mapping between velocity and blindness.  The mean and standard deviation of the normal are derived from the two tool thresholds.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">degrade</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">blind</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">mean</span> <span class="o">=</span> <span class="n">degrade</span> <span class="o">+</span> <span class="p">(</span><span class="n">blind</span><span class="o">-</span><span class="n">degrade</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">std</span> <span class="o">=</span> <span class="p">(</span><span class="n">blind</span><span class="o">-</span><span class="n">degrade</span><span class="p">)</span><span class="o">/</span><span class="mi">6</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">std</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_23_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Function-to-calculate-the-probability-of-blindness">Function to calculate the probability of blindness<a class="anchor-link" href="#Function-to-calculate-the-probability-of-blindness"> </a></h3><p>We define a function to calculate the probability of blindness given two pieces of information: the name of the tool and its velocity.  This is passed as a Panda series data structure for convenience.  The value of row[0] corresponds to the tool name whereas row[1] contains the tool's velocity.  This is not a particularly efficient function, but it encapulates all the logic required for the S-curve.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">prob_blind</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+    <span class="c1"># row[0] is tool, row[1] is velocity</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;Degrade&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;Blind&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;Degrade&quot;</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="p">(</span><span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;Blind&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;Degrade&quot;</span><span class="p">])</span><span class="o">/</span><span class="mi">6</span>
+    <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">std</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Assigning-the-probabilty-of-blindness-to-each-each-measurement">Assigning the probabilty of blindness to each each measurement<a class="anchor-link" href="#Assigning-the-probabilty-of-blindness-to-each-each-measurement"> </a></h3><p>The assignment below creates a new column called <code>ProbBlind</code>.  It uses Python's <code>apply()</code> function to pass tool and velocity for each row of the dataframe with a non-null velocity.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;ProbBlind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="o">~</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Velocity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()][[</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="s2">&quot;Velocity&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">prob_blind</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Plotting-the-probability-of-blindness">Plotting the probability of blindness<a class="anchor-link" href="#Plotting-the-probability-of-blindness"> </a></h3><p>We plot the probability of blindness below against distance to see whether their is greater correlation between blindness for the different tools.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;ProbBlind&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pl</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;prob blind&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_29_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Zooming-in-on-blindness-and-velocity">Zooming in on blindness and velocity<a class="anchor-link" href="#Zooming-in-on-blindness-and-velocity"> </a></h3><p>The next two grapics are zoomed-in versions of the blindness and velocity plots.  The start and end of the zoom can be specified by changing the distances used to define the <code>pl_zoom</code> dataframe.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl_zoom</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[(</span><span class="n">pl</span><span class="o">.</span><span class="n">Distance</span> <span class="o">&gt;</span> <span class="mi">4400</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Distance</span> <span class="o">&lt;</span> <span class="mi">7500</span><span class="p">)]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;ProbBlind&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pl_zoom</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;prob blind&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_31_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Velocity&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pl_zoom</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;velocity&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_32_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Conclusion:</strong> There is even less evidence of corrlation between tools when we look at blindness.  The BHGE tool is never blind in the data set (its speed never exceeds the "degrade" threshold).  This is verified in the dataframe lookup below.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="p">[(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;BHGE MFL&quot;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Velocity&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Distance</th>
+      <th>Tool</th>
+      <th>Velocity</th>
+      <th>ProbBlind</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In short, blindness of the other two tools is a very poor predictor of blindness for the Rosen EMAT.  This is confirmed by the correlation matrix below.  Note: to use the Pandas <code>corr()</code> function, we have to re-pivot the data so that the three tools are column headings.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl_blind</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;ProbBlind&quot;</span><span class="p">)</span>
+<span class="n">pl_blind</span><span class="p">[[</span><span class="s2">&quot;ROSEN EMAT (WSC)&quot;</span><span class="p">,</span> <span class="s2">&quot;ROSEN MFL-C&quot;</span><span class="p">,</span> <span class="s2">&quot;BHGE MFL&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Tool</th>
+      <th>ROSEN EMAT (WSC)</th>
+      <th>ROSEN MFL-C</th>
+      <th>BHGE MFL</th>
+    </tr>
+    <tr>
+      <th>Tool</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ROSEN EMAT (WSC)</th>
+      <td>1.000000</td>
+      <td>0.235803</td>
+      <td>-0.005452</td>
+    </tr>
+    <tr>
+      <th>ROSEN MFL-C</th>
+      <td>0.235803</td>
+      <td>1.000000</td>
+      <td>-0.009446</td>
+    </tr>
+    <tr>
+      <th>BHGE MFL</th>
+      <td>-0.005452</td>
+      <td>-0.009446</td>
+      <td>1.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Test-4:-Speed-peaks">Test 4: Speed peaks<a class="anchor-link" href="#Test-4:-Speed-peaks"> </a></h1><p>On issue that is clear from the probability of blindness analysis is that the Rosen EMAT tool recovers its steady-state speed quicker than the other tools in the dataset.  In this section, we look only at peaks&mdash;that is, the point at which tool speed (a) exceeds a threshold and (b) is the high-point within that speed excursion.  We are primarily interested in the number of peaks and their location in the pipeline.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Routine-to-mark-speed-peaks">Routine to mark speed peaks<a class="anchor-link" href="#Routine-to-mark-speed-peaks"> </a></h3><p>The following function marks the peak of speed excursions.  The basic approach is this:</p>
+<ol>
+<li>Start with a list of rows (for a particular tool) in which velocity exceeds some threshold.  For the EMAT, the threshold is taken as the "degrade" threshold (indicating the onset of a possible blindspot).  For the other tools, the threshold is tunable.</li>
+<li>For each row, one of two things is is true:<ol>
+<li>It is part of a new peak&mdash;that is, it is far enough away from the previous peak to be considered different.  This "far enough away" is determined by the variable <code>dist_thresh</code></li>
+<li>It is part of the current peak.  The question is thus whether it is a new peak or is slower than the existing peak.</li>
+</ol>
+</li>
+</ol>
+<p>This routine marks each record with a 1 if it is a unique peak and zero otherwise.  It is called in the analysis and tuning routines below.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">mark_excursion</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="n">speed_thresh</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">pl</span><span class="p">):</span>
+    <span class="n">hssegs</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Velocity&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">speed_thresh</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">hssegs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pdist</span> <span class="o">=</span> <span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hssegs</span><span class="o">.</span><span class="n">first_valid_index</span><span class="p">(),</span><span class="s2">&quot;Distance&quot;</span><span class="p">]</span> <span class="c1"># starting distance</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;segid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;velocity&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">pdist</span><span class="p">,</span>
+            <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="p">}</span> <span class="c1"># initialize peak holder</span>
+        <span class="k">for</span> <span class="n">segid</span> <span class="ow">in</span> <span class="n">hssegs</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">segid</span><span class="p">,</span> <span class="s2">&quot;Distance&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">pdist</span> <span class="o">+</span> <span class="n">dist_thresh</span><span class="p">):</span>
+                <span class="c1"># write new peak</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">peak</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">],</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">peak</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">],</span> <span class="s2">&quot;Length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
+                <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">segid</span>
+                <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">segid</span><span class="p">,</span> <span class="s2">&quot;Velocity&quot;</span><span class="p">]</span>
+                <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">segid</span><span class="p">,</span> <span class="s2">&quot;Distance&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">segid</span><span class="p">,</span> <span class="s2">&quot;Velocity&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]):</span>
+                    <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">segid</span>
+                    <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">segid</span><span class="p">,</span> <span class="s2">&quot;Velocity&quot;</span><span class="p">]</span>
+            <span class="n">pdist</span> <span class="o">=</span> <span class="n">hssegs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">segid</span><span class="p">,</span> <span class="s2">&quot;Distance&quot;</span><span class="p">]</span>
+            <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">pdist</span>
+        <span class="c1"># write final peak</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">peak</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">],</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">peak</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">],</span> <span class="s2">&quot;Length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">peak</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
+    <span class="k">return</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Mark-speed-peaks-based-on-degrade-thresholds">Mark speed peaks based on degrade thresholds<a class="anchor-link" href="#Mark-speed-peaks-based-on-degrade-thresholds"> </a></h3><p>This is a first cut at matching the other two tools to the speed peaks of the Rosen EMAT. This routine loops through each of the three tools and sets their peak flags.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># reset column</span>
+<span class="n">dist_thresh</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">[</span><span class="n">pipeline</span><span class="p">][</span><span class="s2">&quot;tools&quot;</span><span class="p">]:</span>
+    <span class="n">mark_excursion</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;Degrade&quot;</span><span class="p">],</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">pl</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Compare-peaks-based-on-degrade-thresholds">Compare peaks based on degrade thresholds<a class="anchor-link" href="#Compare-peaks-based-on-degrade-thresholds"> </a></h3><p>As shown below, the BHGE has no speed peaks at its degrade threshold.  The Rosen MFL-C has fewer than the EMAT.  This can be confirm by examining the stacked graphs or simply counting the peaks for each tool</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Tool
+BHGE MFL             0
+ROSEN EMAT (WSC)    21
+ROSEN MFL-C         21
+Name: Excursion, dtype: int64</pre>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">);</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_44_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Tuning-the-peak-parameter">Tuning the peak parameter<a class="anchor-link" href="#Tuning-the-peak-parameter"> </a></h3><p>The objective here is to find velocity thresholds at which the other two tools predict speed excursions for the EMAT.  the peak for the other two tools is set using a simple trial and error loop and attempting to match the number of peaks to that of the EMAT.</p>
+<p>The procedure for using the tuning loop below is as follows:</p>
+<ol>
+<li>Set the tool</li>
+<li>Start with a wide range of values for the threshold speed (<code>i</code> in the loop).</li>
+<li>Repeat until an appropriate value is found for each tool</li>
+<li>Update the <code>tools</code> dictionary below with the best value threshold value of each non-EMAT tool</li>
+</ol>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">vals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="n">tool</span> <span class="o">=</span> <span class="s2">&quot;ROSEN MFL-C&quot;</span>
+<span class="c1">#tool = &quot;BHGE MFL&quot;</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">4.75</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">):</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># reset</span>
+    <span class="n">mark_excursion</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">pl</span><span class="p">)</span>
+    <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tool</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">pl</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">tool</span><span class="p">)[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+<span class="n">vals</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;ROSEN MFL-C&#39;, 4.0, 23),
+ (&#39;ROSEN MFL-C&#39;, 4.05, 25),
+ (&#39;ROSEN MFL-C&#39;, 4.1, 25),
+ (&#39;ROSEN MFL-C&#39;, 4.15, 28),
+ (&#39;ROSEN MFL-C&#39;, 4.2, 28),
+ (&#39;ROSEN MFL-C&#39;, 4.25, 30),
+ (&#39;ROSEN MFL-C&#39;, 4.3, 28),
+ (&#39;ROSEN MFL-C&#39;, 4.35, 25),
+ (&#39;ROSEN MFL-C&#39;, 4.4, 23),
+ (&#39;ROSEN MFL-C&#39;, 4.45, 22),
+ (&#39;ROSEN MFL-C&#39;, 4.5, 21),
+ (&#39;ROSEN MFL-C&#39;, 4.55, 19),
+ (&#39;ROSEN MFL-C&#39;, 4.6, 16),
+ (&#39;ROSEN MFL-C&#39;, 4.65, 14),
+ (&#39;ROSEN MFL-C&#39;, 4.7, 16)]</pre>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Storing-tool-parameters">Storing tool parameters<a class="anchor-link" href="#Storing-tool-parameters"> </a></h3><p>The following values are used for the remainder of this analysis.  These values should be written to the <code>Tools</code> sheet in<code>Datasets.xlsx</code> for use in other notebooks.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;ROSEN EMAT (WSC)&quot;</span><span class="p">,</span> <span class="s2">&quot;Peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;ROSEN EMAT (WSC)&quot;</span><span class="p">,</span> <span class="s2">&quot;Degrade&quot;</span><span class="p">]</span>
+<span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;BHGE MFL&quot;</span><span class="p">,</span> <span class="s2">&quot;Peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.85</span>
+<span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;ROSEN MFL-C&quot;</span><span class="p">,</span> <span class="s2">&quot;Peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">4.5</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Re-marking-peaks-using-the-new-speed-thresholds">Re-marking peaks using the new speed thresholds<a class="anchor-link" href="#Re-marking-peaks-using-the-new-speed-thresholds"> </a></h3><p>A new value <code>peak</code> is added to the tools dictionary. For the EMAT, the peak threshold is simply the "degrade" threshold.  The peak marking routine is run using these thresholds.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">remark_tools</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ROSEN MFL-C&quot;</span><span class="p">,</span> <span class="s2">&quot;BHGE MFL&quot;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">remark_tools</span><span class="p">:</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># reset</span>
+    <span class="n">mark_excursion</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;Peak&quot;</span><span class="p">],</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">pl</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> peaks </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">tool</span><span class="p">)[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>ROSEN MFL-C peaks 21
+BHGE MFL peaks 21
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Comparing-the-peaks">Comparing the peaks<a class="anchor-link" href="#Comparing-the-peaks"> </a></h3><p>The graph below shows the peaks given the parameter tuning. Both tools show some correspondence of peak location compared to the EMAT, although the match is not perfect.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="s2">&quot;Excursion&quot;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">);</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_52_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Tool
+BHGE MFL            21
+ROSEN EMAT (WSC)    21
+ROSEN MFL-C         21
+Name: Excursion, dtype: int64</pre>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Conclusions">Conclusions<a class="anchor-link" href="#Conclusions"> </a></h1><p>We can use speed data from the other two tools to predict the number and approximate location of peaks for the Rosen EMAT.  To do this, we parameterize a peak speed threshold for each tool.  Intuitively, this is the speed above which the peaks for the tool most closely match the peaks for the EMAT (which are based on the tool's degrade threshold and thus likely correspond to blindspots).</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Distribution-of-peak-velocities-and-excursion-lengths">Distribution of peak velocities and excursion lengths<a class="anchor-link" href="#Distribution-of-peak-velocities-and-excursion-lengths"> </a></h1><h3 id="Peak-velocity">Peak velocity<a class="anchor-link" href="#Peak-velocity"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Velocity&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pl</span><span class="p">[</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]);</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_56_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Length-of-excursion">Length of excursion<a class="anchor-link" href="#Length-of-excursion"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Length&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pl</span><span class="p">[</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]);</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_58_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pl</span><span class="p">[</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;Tool&quot;</span><span class="p">)[</span><span class="s2">&quot;Length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Tool
+BHGE MFL            102.899419
+ROSEN EMAT (WSC)     12.968667
+ROSEN MFL-C         227.247515
+Name: Length, dtype: float64</pre>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Distribution-of-excurstion-length-for-EMAT">Distribution of excurstion length for EMAT<a class="anchor-link" href="#Distribution-of-excurstion-length-for-EMAT"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">displot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">pl</span><span class="p">[(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Excursion&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="s2">&quot;Tool&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ROSEN EMAT (WSC)&quot;</span><span class="p">)][</span><span class="s2">&quot;Length&quot;</span><span class="p">],</span> <span class="n">rug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span> <span class="p">);</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="images/Exploratory_61_0.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+ 
+
+
+    </main>
+    
